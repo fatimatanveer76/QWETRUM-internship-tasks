@@ -95,16 +95,18 @@ const spinner = document.getElementById("spinner");
 const errorMessage = document.getElementById("error-message");
 
 let allCountries = [];
-let baseCountries = [];
 
-// FETCH DATA
+// FETCH COUNTRIES
 async function fetchCountries() {
     spinner.style.display = "block";
+    errorMessage.textContent = "";
 
     try {
         const res = await fetch(
             "https://restcountries.com/v3.1/all?fields=name,flags,population,region,capital,currencies,languages"
         );
+
+        if (!res.ok) throw new Error("API Error");
 
         const data = await res.json();
 
@@ -112,11 +114,9 @@ async function fetchCountries() {
             a.name.common.localeCompare(b.name.common)
         );
 
-        baseCountries = allCountries;
+        displayCountries(allCountries.slice(0, 20));
 
-        displayCountries(baseCountries.slice(0, 20));
-
-    } catch (error) {
+    } catch (err) {
         errorMessage.textContent = "Failed to load countries!";
     } finally {
         spinner.style.display = "none";
@@ -127,38 +127,63 @@ async function fetchCountries() {
 function displayCountries(countries) {
     countriesContainer.innerHTML = "";
 
+    if (countries.length === 0) {
+        countriesContainer.innerHTML = `
+            <div class="no-result">
+                No countries found
+            </div>
+        `;
+        return;
+    }
+
     countries.forEach(country => {
         const card = document.createElement("div");
         card.classList.add("country-card");
 
         card.innerHTML = `
-        <img 
-    src="${country.flags?.svg || country.flags?.png || 'https://via.placeholder.com/150'}" 
-    alt="${country.name.common}"
->
+            <img src="${country.flags?.svg || country.flags?.png}"
+                 onerror="this.src='https://via.placeholder.com/300x200?text=No+Flag'">
+
             <div class="country-info">
                 <h3>${country.name.common}</h3>
-                <p>Population: ${country.population.toLocaleString()}</p>
-                <button>View Details</button>
+
+                <p><strong>Population:</strong> ${country.population.toLocaleString()}</p>
+
+                <button class="details-btn">View Details</button>
+                <button class="map-btn">View on Map 🗺️</button>
             </div>
         `;
 
-        card.querySelector("button").addEventListener("click", () => {
+        // DETAILS
+        card.querySelector(".details-btn").addEventListener("click", () => {
             showDetails(country);
+        });
+
+        // MAP
+        card.querySelector(".map-btn").addEventListener("click", () => {
+            const location = country.capital?.[0] || country.name.common;
+            const url = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(location)}`;
+            window.open(url, "_blank");
         });
 
         countriesContainer.appendChild(card);
     });
 }
 
-// POPUP
+// MODAL DETAILS
 function showDetails(country) {
-    const capital = country.capital ? country.capital[0] : "N/A";
 
+    // CAPITAL
+    const capital = country.capital?.[0] || "N/A";
+
+    // CURRENCY (can be multiple)
     const currency = country.currencies
-        ? Object.values(country.currencies)[0].name
+        ? Object.values(country.currencies)
+              .map(c => c.name)
+              .join(", ")
         : "N/A";
 
+    // LANGUAGES (can be multiple)
     const languages = country.languages
         ? Object.values(country.languages).join(", ")
         : "N/A";
@@ -168,11 +193,24 @@ function showDetails(country) {
 
     modal.innerHTML = `
         <div class="modal-content">
+
+            <img class="modal-flag"
+                 src="${country.flags?.svg || country.flags?.png}">
+
             <h2>${country.name.common}</h2>
+
             <p><strong>Capital:</strong> ${capital}</p>
+
+            <p><strong>Population:</strong> ${country.population.toLocaleString()}</p>
+
+            <p><strong>Region:</strong> ${country.region}</p>
+
             <p><strong>Currency:</strong> ${currency}</p>
+
             <p><strong>Languages:</strong> ${languages}</p>
+
             <button id="closeBtn">Close</button>
+
         </div>
     `;
 
@@ -187,7 +225,8 @@ function showDetails(country) {
     });
 }
 
-// FILTER FUNCTION
+
+// FILTER + SEARCH
 function applyFilters() {
     const searchText = searchInput.value.toLowerCase();
     const region = regionFilter.value;
@@ -198,18 +237,20 @@ function applyFilters() {
         filtered = filtered.filter(c => c.region === region);
     }
 
-    if (searchText !== "") {
+    if (searchText) {
         filtered = filtered.filter(c =>
             c.name.common.toLowerCase().includes(searchText)
         );
     }
 
-    displayCountries(filtered.slice(0, 20));
+    if (!searchText && region === "All") {
+        displayCountries(allCountries.slice(0, 20));
+    } else {
+        displayCountries(filtered);
+    }
 }
 
-// EVENTS
 searchInput.addEventListener("input", applyFilters);
 regionFilter.addEventListener("change", applyFilters);
 
-// INIT
 fetchCountries();

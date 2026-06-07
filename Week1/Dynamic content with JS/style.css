@@ -2,13 +2,14 @@ body {
     font-family: Arial, sans-serif;
     margin: 0;
     padding: 0;
-    background: #f4f4f4;
+    background: beige;
 }
 
+/* HEADER */
 header {
     text-align: center;
     padding: 20px;
-    background: #333;
+    background:#1e3a8a;
     color: white;
 }
 
@@ -23,33 +24,44 @@ header {
 input, select {
     padding: 10px;
     font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #ccc;
 }
 
+/* SPINNER */
 .spinner {
     text-align: center;
     margin: 15px;
     display: none;
 }
 
+/* ERROR */
 #error-message {
     text-align: center;
-    color: red;
+    color: #ea4335;
+    font-weight: bold;
 }
 
+/* GRID */
 .countries-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 15px;
     padding: 20px;
 }
 
+/* CARD */
 .country-card {
-    background: white;
+    background: #ffffff;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     text-align: center;
-    padding-bottom: 10px;
+    transition: transform 0.2s ease;
+}
+
+.country-card:hover {
+    transform: translateY(-5px);
 }
 
 .country-card img {
@@ -59,12 +71,64 @@ input, select {
 }
 
 .country-info {
-    padding: 10px;
+    padding: 12px;
 }
 
 .country-info button {
-    margin-top: 10px;
-    padding: 6px 10px;
+    margin-top: 8px;
+    padding: 7px 12px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 100%;
+}
+
+.details-btn {
+    background: #333;
+    color: white;
+}
+
+.details-btn:hover {
+    background: #555;
+}
+
+.map-btn {
+    background:#1e3a8a;
+    color: white;
+}
+
+.map-btn:hover {
+    background: #005fcc;
+}
+
+/* MODAL */
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    text-align: center;
+}
+
+.modal-flag {
+    width: 120px;
+    margin-bottom: 10px;
+}
+
+.modal-content button {
+    margin-top: 15px;
+    padding: 10px 20px;
     border: none;
     background: #333;
     color: white;
@@ -72,23 +136,13 @@ input, select {
     cursor: pointer;
 }
 
-/* MODAL */
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.modal-content button:hover {
+    background: #555;
 }
 
-.modal-content {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 300px;
+/* NO RESULT */
+.no-result {
     text-align: center;
+    padding: 40px;
+    color: #555;
 }
